@@ -387,8 +387,13 @@
             const populatePreview = () => {
                 const data = {
                     patientName: document.getElementById('patientName').value, patientId: document.getElementById('patientId').value, cabinNo: document.getElementById('cabinNo').value, admissionDate: formatDate(document.getElementById('admissionDate').value), dischargeDate: formatDate(document.getElementById('dischargeDate').value), caseSummary: document.getElementById('caseSummary').value, operativeNotes: document.getElementById('operativeNotes').value, bp: document.getElementById('bp').value, temp: document.getElementById('temp').value, spo2: document.getElementById('spo2').value, pain: document.getElementById('pain').value, wound: document.getElementById('wound').value, advice: document.getElementById('advice').value, followUpDate: formatDateTime(document.getElementById('followUpDate').value) };
-                const previewKeys = ['doctor_qualifications', 'summary_title', 'patient_info_header', 'patient_name_label', 'patient_id_label', 'cabin_no_label', 'admission_date_label', 'discharge_date_label', 'clinical_details_header', 'case_summary_label', 'operative_notes_label', 'vitals_header', 'bp_label', 'temp_label', 'spo2_label', 'pain_label', 'wound_label', 'medication_header', 'med_name_header', 'med_dose_header', 'med_freq_header', 'med_instr_header', 'med_dur_header', 'advice_header', 'advice_label', 'followup_date_label', 'signature_line'];
-                previewKeys.forEach(key => { document.getElementById(`preview-${key}`).innerHTML = translations[currentLang][key]; });
+                const previewKeys = ['summary_title', 'patient_info_header', 'patient_name_label', 'patient_id_label', 'cabin_no_label', 'admission_date_label', 'discharge_date_label', 'clinical_details_header', 'case_summary_label', 'operative_notes_label', 'vitals_header', 'bp_label', 'temp_label', 'spo2_label', 'pain_label', 'wound_label', 'medication_header', 'med_name_header', 'med_dose_header', 'med_freq_header', 'med_instr_header', 'med_dur_header', 'advice_header', 'advice_label', 'followup_date_label', 'signature_line'];
+                previewKeys.forEach(key => { 
+                    const el = document.getElementById(`preview-${key}`);
+                    if (el) {
+                        el.innerHTML = translations[currentLang][key]; 
+                    }
+                });
                 document.getElementById('info-doctor_name').innerHTML = translations[currentLang]['doctor_name'];
                 document.getElementById('info-doctor_qualifications').innerHTML = translations[currentLang]['doctor_qualifications'];
                 Object.keys(data).forEach(key => { const el = document.getElementById(`preview-${key}`); if (el) el.innerText = data[key] || '---'; });
@@ -419,3 +424,4 @@
     </script>
 </body>
 </html>
+
