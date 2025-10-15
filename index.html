@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discharge Summary Generator - Dr. Md. Ashraful Alam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .font-bengali {
+            font-family: 'Hind Siliguri', sans-serif;
+        }
+        .preview-section { display: none; }
+        .form-section {
+             transition: opacity 0.3s ease-in-out;
+        }
+
+        /* Print-specific styles */
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 1cm;
+            }
+            body, html {
+                background-color: #fff;
+            }
+            body * {
+                visibility: hidden;
+            }
+            .printable-area, .printable-area * {
+                visibility: visible;
+            }
+            .printable-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            .print-page {
+                width: 100%;
+                height: 100%;
+                page-break-after: always;
+                box-shadow: none !important;
+                border: none !important;
+            }
+            .print-page:last-child {
+                page-break-after: auto;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 sm:p-6 md:p-8">
+    <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg">
+        <!-- Header -->
+        <div class="p-6 border-b border-gray-200 bg-gray-50 rounded-t-2xl text-center">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800" data-lang-key="hospital_name">HICARE GENERAL HOSPITAL LIMITED</h1>
+            <p class="text-sm text-gray-600 mt-1" data-lang-key="hospital_address">Lake Drive Road, Sector 07, Uttara, Dhaka-1230</p>
+            <div class="mt-4">
+                 <h2 class="text-xl sm:text-2xl font-semibold text-blue-700" data-lang-key="doctor_name">Assoc. Prof. Dr. Md. Ashraful Alam</h2>
+                 <p class="text-xs text-gray-500 max-w-2xl mx-auto" data-lang-key="doctor_qualifications">MBBS, MCPS (Surg), MPH (Hosp. Manag), FCPS (Part 2), BCS (Health Rtd)</p>
+            </div>
+        </div>
+
+        <div class="p-6 md:p-8">
+            <!-- Form Section -->
+            <div class="form-section">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-700" data-lang-key="form_title">Discharge Form Entry</h2>
+                    <div class="flex items-center space-x-2 bg-gray-200 p-1 rounded-full">
+                        <button id="lang-en" class="px-4 py-1.5 text-sm font-semibold rounded-full bg-white text-blue-600 shadow">English</button>
+                        <button id="lang-bn" class="px-4 py-1.5 text-sm font-semibold rounded-full text-gray-600">বাংলা</button>
+                    </div>
+                </div>
+
+                <form id="discharge-form" class="space-y-8">
+                    <!-- Patient Information -->
+                    <fieldset class="border border-gray-300 p-4 rounded-lg">
+                        <legend class="text-lg font-semibold px-2 text-gray-700" data-lang-key="patient_info_header">Patient Information</legend>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+                            <div>
+                                <label for="patientName" class="block text-sm font-medium text-gray-700" data-lang-key="patient_name_label">Patient Name</label>
+                                <input type="text" id="patientName" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Mr./Ms. John Doe">
+                            </div>
+                            <div>
+                                <label for="patientId" class="block text-sm font-medium text-gray-700" data-lang-key="patient_id_label">Patient ID (PID)</label>
+                                <input type="text" id="patientId" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., 25090926">
+                            </div>
+                            <div>
+                                <label for="cabinNo" class="block text-sm font-medium text-gray-700" data-lang-key="cabin_no_label">Cabin No.</label>
+                                <input type="text" id="cabinNo" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Post-5">
+                            </div>
+                             <div>
+                                <label for="admissionDate" class="block text-sm font-medium text-gray-700" data-lang-key="admission_date_label">Date of Admission</label>
+                                <input type="date" id="admissionDate" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="dischargeDate" class="block text-sm font-medium text-gray-700" data-lang-key="discharge_date_label">Date of Discharge</label>
+                                <input type="date" id="dischargeDate" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Clinical Details -->
+                    <fieldset class="border border-gray-300 p-4 rounded-lg">
+                        <legend class="text-lg font-semibold px-2 text-gray-700" data-lang-key="clinical_details_header">Clinical Details</legend>
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                            <div>
+                                <label for="caseSummary" class="block text-sm font-medium text-gray-700" data-lang-key="case_summary_label">Case Summary</label>
+                                <textarea id="caseSummary" rows="4" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            </div>
+                            <div>
+                                <label for="operativeNotes" class="block text-sm font-medium text-gray-700" data-lang-key="operative_notes_label">Operative Notes</label>
+                                <textarea id="operativeNotes" rows="4" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            </div>
+                        </div>
+                        <h4 class="text-md font-semibold mt-6 mb-2 text-gray-600" data-lang-key="vitals_header">Vitals at Discharge</h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                            <div>
+                                <label for="bp" class="block text-xs font-medium text-gray-600" data-lang-key="bp_label">BP (mmHg)</label>
+                                <input type="text" id="bp" placeholder="120/80" class="mt-1 block w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                             <div>
+                                <label for="temp" class="block text-xs font-medium text-gray-600" data-lang-key="temp_label">Temp (°F)</label>
+                                <input type="text" id="temp" placeholder="98.6" class="mt-1 block w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="spo2" class="block text-xs font-medium text-gray-600" data-lang-key="spo2_label">SpO2 (%)</label>
+                                <input type="text" id="spo2" placeholder="99" class="mt-1 block w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="pain" class="block text-xs font-medium text-gray-600" data-lang-key="pain_label">Pain</label>
+                                <input type="text" id="pain" placeholder="Mild" class="mt-1 block w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="wound" class="block text-xs font-medium text-gray-600" data-lang-key="wound_label">Wound</label>
+                                <input type="text" id="wound" placeholder="Healthy" class="mt-1 block w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Medication -->
+                    <fieldset class="border border-gray-300 p-4 rounded-lg">
+                        <legend class="text-lg font-semibold px-2 text-gray-700" data-lang-key="medication_header">Medication on Discharge</legend>
+                        <div id="medication-list" class="mt-4 space-y-4">
+                            <!-- Medication rows will be added here -->
+                        </div>
+                        <button type="button" id="add-medication" class="mt-4 flex items-center justify-center w-full px-4 py-2 border border-dashed border-gray-400 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                            <span data-lang-key="add_med_button">Add Medication</span>
+                        </button>
+                    </fieldset>
+
+                    <!-- Advice & Follow-up -->
+                     <fieldset class="border border-gray-300 p-4 rounded-lg">
+                        <legend class="text-lg font-semibold px-2 text-gray-700" data-lang-key="advice_header">Advice & Follow-up</legend>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                            <div>
+                                <label for="advice" class="block text-sm font-medium text-gray-700" data-lang-key="advice_label">Advice</label>
+                                <textarea id="advice" rows="4" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            </div>
+                            <div>
+                                <label for="followUpDate" class="block text-sm font-medium text-gray-700" data-lang-key="followup_date_label">Follow-up Date</label>
+                                <input type="datetime-local" id="followUpDate" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end space-x-4 pt-4">
+                        <button type="button" id="reset-form" class="px-6 py-2.5 bg-gray-200 text-gray-700 font-semibold rounded-lg shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400" data-lang-key="reset_button">Reset Form</button>
+                        <button type="submit" class="px-8 py-2.5 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" data-lang-key="generate_button">Generate Summary</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Preview Section -->
+            <div class="preview-section bg-gray-200 p-4 rounded-lg">
+                 <div class="printable-area space-y-4">
+                    <!-- PAGE 1: DISCHARGE SUMMARY -->
+                    <div id="page-1" class="print-page bg-white p-6 shadow-lg rounded-lg">
+                        <!-- Header -->
+                        <div class="text-center mb-4 pb-3 border-b">
+                            <h3 class="text-xl font-bold text-gray-800" id="preview-hospital_name"></h3>
+                            <p class="text-xs text-gray-600" id="preview-hospital_address"></p>
+                            <div class="mt-2">
+                                 <h4 class="text-lg font-semibold text-blue-700" id="preview-doctor_name"></h4>
+                                 <p class="text-[10px] text-gray-500" id="preview-doctor_qualifications"></p>
+                            </div>
+                        </div>
+                        <h2 class="text-lg font-bold text-center mb-4 text-gray-700" id="preview-summary_title"></h2>
+                        <div class="flex space-x-6 text-sm">
+                            <!-- Left Column -->
+                            <div class="w-1/2 space-y-4">
+                                <!-- Patient Info -->
+                                <div>
+                                    <h4 class="font-semibold border-b pb-1 mb-2 text-gray-800" id="preview-patient_info_header"></h4>
+                                    <table class="w-full text-xs">
+                                        <tbody>
+                                            <tr><td class="py-1 pr-2 font-medium text-gray-600 w-1/3" id="preview-patient_name_label"></td><td class="py-1" id="preview-patientName"></td></tr>
+                                            <tr><td class="py-1 pr-2 font-medium text-gray-600" id="preview-patient_id_label"></td><td class="py-1" id="preview-patientId"></td></tr>
+                                            <tr><td class="py-1 pr-2 font-medium text-gray-600" id="preview-cabin_no_label"></td><td class="py-1" id="preview-cabinNo"></td></tr>
+                                            <tr><td class="py-1 pr-2 font-medium text-gray-600" id="preview-admission_date_label"></td><td class="py-1" id="preview-admissionDate"></td></tr>
+                                            <tr><td class="py-1 pr-2 font-medium text-gray-600" id="preview-discharge_date_label"></td><td class="py-1" id="preview-dischargeDate"></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- Clinical -->
+                                <div>
+                                    <h4 class="font-semibold border-b pb-1 mb-2 text-gray-800" id="preview-clinical_details_header"></h4>
+                                    <div class="space-y-2 text-xs">
+                                        <div>
+                                            <h5 class="font-semibold text-gray-600" id="preview-case_summary_label"></h5>
+                                            <p class="mt-1 text-gray-800 whitespace-pre-wrap" id="preview-caseSummary"></p>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-semibold text-gray-600" id="preview-operative_notes_label"></h5>
+                                            <p class="mt-1 text-gray-800 whitespace-pre-wrap" id="preview-operativeNotes"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Right Column -->
+                            <div class="w-1/2 space-y-4">
+                                <!-- Vitals -->
+                                <div>
+                                     <h4 class="font-semibold border-b pb-1 mb-2 text-gray-800" id="preview-vitals_header"></h4>
+                                     <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                                        <div><strong id="preview-bp_label"></strong> <span id="preview-bp"></span></div>
+                                        <div><strong id="preview-temp_label"></strong> <span id="preview-temp"></span></div>
+                                        <div><strong id="preview-spo2_label"></strong> <span id="preview-spo2"></span></div>
+                                        <div><strong id="preview-pain_label"></strong> <span id="preview-pain"></span></div>
+                                        <div><strong id="preview-wound_label"></strong> <span id="preview-wound"></span></div>
+                                     </div>
+                                </div>
+                                <!-- Medication -->
+                                <div>
+                                    <h4 class="font-semibold border-b pb-1 mb-2 text-gray-800" id="preview-medication_header"></h4>
+                                    <table class="w-full text-xs text-left border-collapse">
+                                        <thead><tr class="bg-gray-100">
+                                            <th class="p-1.5 border" id="preview-med_name_header"></th>
+                                            <th class="p-1.5 border" id="preview-med_dose_header"></th>
+                                            <th class="p-1.5 border" id="preview-med_freq_header"></th>
+                                            <th class="p-1.5 border" id="preview-med_instr_header"></th>
+                                            <th class="p-1.5 border" id="preview-med_dur_header"></th>
+                                        </tr></thead>
+                                        <tbody id="preview-medication-list"></tbody>
+                                    </table>
+                                </div>
+                                 <!-- Advice & Follow-up -->
+                                <div>
+                                    <h4 class="font-semibold border-b pb-1 mb-2 text-gray-800" id="preview-advice_header"></h4>
+                                    <div class="text-xs">
+                                       <p class="font-semibold text-gray-600" id="preview-advice_label"></p>
+                                       <p class="mt-1 text-gray-800 whitespace-pre-wrap" id="preview-advice"></p>
+                                    </div>
+                                     <div class="mt-2">
+                                       <p class="font-semibold text-gray-600" id="preview-followup_date_label"></p>
+                                       <p class="mt-1 text-gray-800 font-medium" id="preview-followUpDate"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                         <!-- Signature -->
+                        <div class="pt-12 text-right">
+                             <div class="inline-block"><div class="border-t-2 border-gray-400 pt-1" style="width: 200px;">
+                                   <p class="text-center text-xs font-semibold" id="preview-signature_line"></p>
+                             </div></div>
+                        </div>
+                    </div>
+                    <!-- PAGE 2: DOCTOR'S INFO -->
+                    <div id="page-2" class="print-page bg-white p-6 shadow-lg rounded-lg">
+                        <div class="flex h-full space-x-6">
+                            <!-- Left Column: Credentials -->
+                            <div class="w-2/5 bg-blue-50 p-6 rounded-lg flex flex-col justify-center items-center text-center">
+                                <svg class="h-24 w-24 text-blue-500 mb-4" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-12h2v2h-2v-2zm0 4h2v6h-2v-6z"/></svg>
+                                 <h3 class="text-xl font-bold text-blue-800" id="info-doctor_name"></h3>
+                                <p class="text-xs text-blue-700 mt-1" id="info-doctor_qualifications"></p>
+                                <div class="border-t my-4 w-1/2 mx-auto"></div>
+                                <div class="text-xs text-left space-y-1">
+                                    <p><strong data-lang-key="bmdc_reg">BMDC Reg:</strong> A 15156</p>
+                                    <p><strong data-lang-key="email">Email:</strong> ashrafulalam6267@gmail.com</p>
+                                    <p class="font-semibold mt-2" data-lang-key="memberships">Memberships:</p>
+                                    <ul class="list-disc list-inside">
+                                        <li data-lang-key="sosb">Life member of SOSB (A051)</li>
+                                        <li data-lang-key="selsb">Life member of SELSB (171)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <!-- Right Column: Procedures -->
+                            <div class="w-3/5 p-6">
+                                <h3 class="text-xl font-bold text-gray-800 border-b-2 border-blue-500 pb-2 mb-4" data-lang-key="why_choose_us">Why Choose Us?</h3>
+                                <ul class="space-y-3 text-sm list-disc list-inside text-gray-700">
+                                    <li data-lang-key="experience_40"><strong>40 Years of Experience:</strong> A legacy of trust, skill, and professionalism.</li>
+                                    <li data-lang-key="laparoscopy_26"><strong>26 Years in Laparoscopy:</strong> Expert in modern, minimally invasive surgical techniques. Laparoscopy is the GOLD STANDARD.</li>
+                                     <li data-lang-key="specialization"><strong>Specialized Training:</strong> Advanced training in Colorectal & Breast Surgery.</li>
+                                    <li data-lang-key="success_rate"><strong>High Success Rate:</strong> Commitment to patient safety and outcomes with a success rate of over 99%.</li>
+                                    <li data-lang-key="affordable"><strong>Affordable & Satisfactory:</strong> Providing high-quality care at a reasonable cost.</li>
+                                </ul>
+                                 <h3 class="text-xl font-bold text-gray-800 border-b-2 border-blue-500 pb-2 mb-4 mt-8" data-lang-key="hicare_advantage">The Hicare Hospital Advantage</h3>
+                                  <ul class="space-y-3 text-sm list-disc list-inside text-gray-700">
+                                     <li data-lang-key="modern_facilities">Equipped with all modern facilities and state-of-the-art instruments.</li>
+                                     <li data-lang-key="skilled_team">Managed by skilled and experienced professionals.</li>
+                                     <li data-lang-key="cleanliness">A commitment to the highest standards of cleanliness and hygiene.</li>
+                                  </ul>
+                                <p class="text-center mt-8 text-lg font-semibold text-blue-600" data-lang-key="our_prayer">Your good health is our prayer.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                 <div class="mt-6 flex justify-center space-x-4 no-print">
+                    <button type="button" id="edit-form" class="px-6 py-2.5 bg-gray-200 text-gray-700 font-semibold rounded-lg shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"></button>
+                    <button type="button" id="print-summary" class="px-8 py-2.5 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- TRANSLATIONS ---
+            const translations = {
+                en: {
+                    hospital_name: "HICARE GENERAL HOSPITAL LIMITED", hospital_address: "Lake Drive Road, Sector 07, Uttara, Dhaka-1230", doctor_name: "Assoc. Prof. Dr. Md. Ashraful Alam", doctor_qualifications: "MBBS, MCPS (Surg), MPH (Hosp. Manag), FCPS (Part 2), BCS (Health Rtd)", form_title: "Discharge Form Entry", patient_info_header: "Patient Information", patient_name_label: "Patient Name", patient_id_label: "Patient ID (PID)", cabin_no_label: "Cabin No.", admission_date_label: "Date of Admission", discharge_date_label: "Date of Discharge", clinical_details_header: "Clinical Details", case_summary_label: "Case Summary", operative_notes_label: "Operative Notes", vitals_header: "Vitals at Discharge", bp_label: "BP:", temp_label: "Temp:", spo2_label: "SpO2:", pain_label: "Pain:", wound_label: "Wound:", medication_header: "Medication on Discharge", add_med_button: "Add Medication", med_name_label: "Medicine Name", med_dose_label: "Dose", med_freq_label: "Frequency", med_instr_label: "Instruction", med_dur_label: "Duration", instr_option_after: "After Meal", instr_option_before: "Before Meal", instr_option_na: "N/A", advice_header: "Advice & Follow-up", advice_label: "Advice:", followup_date_label: "Follow-up:", reset_button: "Reset Form", generate_button: "Generate Summary", summary_title: "DISCHARGE SUMMARY", edit_button: "Back to Edit", print_button: "Print Summary", signature_line: "Dr. Md. Ashraful Alam (Signature)", med_name_header: "Medicine", med_dose_header: "Dose", med_freq_header: "Frequency", med_instr_header: "Instruction", med_dur_header: "Duration", bmdc_reg: "BMDC Reg:", email: "Email:", memberships: "Memberships:", sosb: "Life member of SOSB (A051)", selsb: "Life member of SELSB (171)", why_choose_us: "Why Choose Us?", experience_40: "<strong>40 Years of Experience:</strong> A legacy of trust, skill, and professionalism.", laparoscopy_26: "<strong>26 Years in Laparoscopy:</strong> Expert in modern, minimally invasive surgical techniques. Laparoscopy is the GOLD STANDARD.", specialization: "<strong>Specialized Training:</strong> Advanced training in Colorectal & Breast Surgery.", success_rate: "<strong>High Success Rate:</strong> Commitment to patient safety and outcomes with a success rate of over 99%.", affordable: "<strong>Affordable & Satisfactory:</strong> Providing high-quality care at a reasonable cost.", hicare_advantage: "The Hicare Hospital Advantage", modern_facilities: "Equipped with all modern facilities and state-of-the-art instruments.", skilled_team: "Managed by skilled and experienced professionals.", cleanliness: "A commitment to the highest standards of cleanliness and hygiene.", our_prayer: "Your good health is our prayer."
+                },
+                bn: {
+                    hospital_name: "হাইকেয়ার জেনারেল হাসপাতাল লিমিটেড", hospital_address: "লেক ড্রাইভ রোড, সেক্টর ০৭, উত্তরা, ঢাকা-১২৩০", doctor_name: "সহযোগী অধ্যাপক ডাঃ মোঃ আশরাফুল আলম", doctor_qualifications: "এমবিবিএস, এমসিপিএস (সার্জারী), এমপিএইচ (হসপিটাল ম্যানেজমেন্ট), এফসিপিএস (পার্ট ২), বিসিএস (স্বাস্থ্য রিটায়ার্ড)", form_title: "ছাড়পত্র ফর্ম", patient_info_header: "রোগীর তথ্য", patient_name_label: "রোগীর নাম", patient_id_label: "রোগী আইডি (PID)", cabin_no_label: "কেবিন নং", admission_date_label: "ভর্তির তারিখ", discharge_date_label: "ছাড়পত্রের তারিখ", clinical_details_header: "চিকিৎসার বিবরণ", case_summary_label: "কেস সারসংক্ষেপ:", operative_notes_label: "অপারেশনের বিবরণ:", vitals_header: "ছাড়পত্রের সময় শারীরিক অবস্থা", bp_label: "রক্তচাপ:", temp_label: "তাপমাত্রা:", spo2_label: "অক্সিজেন:", pain_label: "ব্যথা:", wound_label: "ক্ষত:", medication_header: "প্রয়োজনীয় ঔষধ", add_med_button: "নতুন ঔষধ যোগ করুন", med_name_label: "ঔষধের নাম", med_dose_label: "ডোজ", med_freq_label: "সেবনবিধি", med_instr_label: "নির্দেশনা", med_dur_label: "সময়কাল", instr_option_after: "খাবার পর", instr_option_before: "খাবার আগে", instr_option_na: "প্রযোজ্য নয়", advice_header: "উপদেশ ও ফলো-আপ", advice_label: "উপদেশ:", followup_date_label: "পুনরায়:", reset_button: "রিসেট করুন", generate_button: "ছাড়পত্র তৈরি করুন", summary_title: "ছাড়পত্র", edit_button: "ফর্মে ফিরে যান", print_button: "ছাড়পত্র প্রিন্ট করুন", signature_line: "ডাঃ মোঃ আশরাফুল আলম (স্বাক্ষর)", med_name_header: "ঔষধ", med_dose_header: "ডোজ", med_freq_header: "সেবনবিধি", med_instr_header: "নির্দেশনা", med_dur_header: "সময়কাল", bmdc_reg: "বিএমডিসি রেজি:", email: "ইমেইল:", memberships: "সদস্যপদ:", sosb: "লাইফ মেম্বার, SOSB (A051)", selsb: "লাইফ মেম্বার, SELSB (171)", why_choose_us: "কেন আমাদের বেছে নিবেন?", experience_40: "<strong>৪০ বছরের অভিজ্ঞতা:</strong> বিশ্বাস, দক্ষতা এবং পেশাদারিত্বের এক উত্তরাধিকার।", laparoscopy_26: "<strong>২৬ বছরের ল্যাপারোস্কোপি অভিজ্ঞতা:</strong> আধুনিক এবং ন্যূনতম ইনভেসিভ সার্জারিতে বিশেষজ্ঞ। ল্যাপারোস্কোপি গোল্ড স্ট্যান্ডার্ড।", specialization: "<strong>বিশেষ প্রশিক্ষণ:</strong> কোলোরেক্টাল এবং ব্রেস্ট সার্জারিতে উন্নত প্রশিক্ষণ।", success_rate: "<strong>উচ্চ সাফল্যের হার:</strong> ৯৯% এর বেশি সাফল্যের হার সহ রোগীর সুরক্ষা এবং ফলাফলের প্রতিশ্রুতি।", affordable: "<strong>সাশ্রয়ী ও সন্তোষজনক:</strong> যুক্তিসঙ্গত খরচে উচ্চমানের যত্ন প্রদান।", hicare_advantage: "হাইকেয়ার হাসপাতালের সুবিধা", modern_facilities: "সমস্ত আধুনিক সুবিধা এবং অত্যাধুনিক যন্ত্রপাতি দ্বারা সজ্জিত।", skilled_team: "দক্ষ এবং অভিজ্ঞ পেশাদারদের দ্বারা পরিচালিত।", cleanliness: "পরিষ্কার-পরিচ্ছন্নতার সর্বোচ্চ মানের প্রতিশ্রুতি।", our_prayer: "আপনার সুস্বাস্থ্যই আমাদের প্রার্থনা।"
+                }
+            };
+
+            // --- STATE ---
+            let currentLang = 'en';
+
+            // --- ELEMENTS ---
+            const langEnBtn = document.getElementById('lang-en');
+            const langBnBtn = document.getElementById('lang-bn');
+            const medicationList = document.getElementById('medication-list');
+            const addMedicationBtn = document.getElementById('add-medication');
+            const dischargeForm = document.getElementById('discharge-form');
+            const formSection = document.querySelector('.form-section');
+            const previewSection = document.querySelector('.preview-section');
+            const editFormBtn = document.getElementById('edit-form');
+            const printSummaryBtn = document.getElementById('print-summary');
+            const resetFormBtn = document.getElementById('reset-form');
+
+            // --- FUNCTIONS ---
+            const setLanguage = (lang) => {
+                currentLang = lang; document.documentElement.lang = lang;
+                if (lang === 'bn') {
+                    langBnBtn.classList.add('bg-white', 'text-blue-600', 'shadow'); langEnBtn.classList.remove('bg-white', 'text-blue-600', 'shadow');
+                    langBnBtn.classList.remove('text-gray-600'); langEnBtn.classList.add('text-gray-600');
+                    document.body.classList.add('font-bengali');
+                } else {
+                    langEnBtn.classList.add('bg-white', 'text-blue-600', 'shadow'); langBnBtn.classList.remove('bg-white', 'text-blue-600', 'shadow');
+                    langEnBtn.classList.remove('text-gray-600'); langBnBtn.classList.add('text-gray-600');
+                    document.body.classList.remove('font-bengali');
+                }
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (translations[lang][key]) { el.innerHTML = translations[lang][key]; }
+                });
+                updateDynamicLabels();
+            };
+            
+            const updateDynamicLabels = () => {
+                 medicationList.querySelectorAll('.medication-row').forEach(row => {
+                    row.querySelector('.med-name-label').innerText = translations[currentLang].med_name_label;
+                    row.querySelector('.med-dose-label').innerText = translations[currentLang].med_dose_label;
+                    row.querySelector('.med-freq-label').innerText = translations[currentLang].med_freq_label;
+                    row.querySelector('.med-instr-label').innerText = translations[currentLang].med_instr_label;
+                    row.querySelector('.med-dur-label').innerText = translations[currentLang].med_dur_label;
+                    const instrSelect = row.querySelector('select');
+                    instrSelect.options[0].text = translations[currentLang].instr_option_after;
+                    instrSelect.options[1].text = translations[currentLang].instr_option_before;
+                    instrSelect.options[2].text = translations[currentLang].instr_option_na;
+                });
+            };
+
+            const createMedicationRow = () => {
+                const div = document.createElement('div');
+                div.className = 'medication-row p-4 bg-gray-50 rounded-lg border grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end relative';
+                div.innerHTML = `
+                    <div class="lg:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 med-name-label"></label>
+                        <input type="text" class="med-name mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md">
+                    </div>
+                    <div><label class="block text-sm font-medium text-gray-700 med-dose-label"></label><input type="text" class="med-dose mt-1 block w-full px-3 py-2 text-sm border rounded-md"></div>
+                    <div><label class="block text-sm font-medium text-gray-700 med-freq-label"></label><input type="text" class="med-freq mt-1 block w-full px-3 py-2 text-sm border rounded-md" placeholder="1+0+1"></div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label class="block text-sm font-medium text-gray-700 med-instr-label"></label><select class="med-instr mt-1 block w-full px-3 py-2 text-sm border rounded-md"><option value="After Meal"></option><option value="Before Meal"></option><option value="N/A"></option></select></div>
+                        <div><label class="block text-sm font-medium text-gray-700 med-dur-label"></label><input type="text" class="med-dur mt-1 block w-full px-3 py-2 text-sm border rounded-md"></div>
+                    </div>
+                    <button type="button" class="remove-med-btn absolute -top-2 -right-2 bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center shadow hover:bg-red-600">&times;</button>`;
+                medicationList.appendChild(div);
+                div.querySelector('.remove-med-btn').addEventListener('click', () => div.remove());
+                updateDynamicLabels(); // Set labels for the new row
+            };
+            
+            const formatDate = (dateString) => {
+                 if (!dateString) return '';
+                 const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                 return new Date(dateString).toLocaleDateString(currentLang === 'bn' ? 'bn-BD' : 'en-US', options);
+            };
+
+            const formatDateTime = (dateTimeString) => {
+                if (!dateTimeString) return '';
+                const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
+                return new Date(dateTimeString).toLocaleString(currentLang === 'bn' ? 'bn-BD' : 'en-US', options);
+            };
+
+            const populatePreview = () => {
+                const lang = currentLang; const data = {
+                    patientName: document.getElementById('patientName').value, patientId: document.getElementById('patientId').value, cabinNo: document.getElementById('cabinNo').value, admissionDate: formatDate(document.getElementById('admissionDate').value), dischargeDate: formatDate(document.getElementById('dischargeDate').value), caseSummary: document.getElementById('caseSummary').value, operativeNotes: document.getElementById('operativeNotes').value, bp: document.getElementById('bp').value, temp: document.getElementById('temp').value, spo2: document.getElementById('spo2').value, pain: document.getElementById('pain').value, wound: document.getElementById('wound').value, advice: document.getElementById('advice').value, followUpDate: formatDateTime(document.getElementById('followUpDate').value) };
+                const previewElements = { 'hospital_name': 'preview-hospital_name', 'hospital_address': 'preview-hospital_address', 'doctor_name': ['preview-doctor_name', 'info-doctor_name'], 'doctor_qualifications': ['preview-doctor_qualifications', 'info-doctor_qualifications'], 'summary_title': 'preview-summary_title', 'patient_info_header': 'preview-patient_info_header', 'patient_name_label': 'preview-patient_name_label', 'patient_id_label': 'preview-patient_id_label', 'cabin_no_label': 'preview-cabin_no_label', 'admission_date_label': 'preview-admission_date_label', 'discharge_date_label': 'preview-discharge_date_label', 'clinical_details_header': 'preview-clinical_details_header', 'case_summary_label': 'preview-case_summary_label', 'operative_notes_label': 'preview-operative_notes_label', 'vitals_header': 'preview-vitals_header', 'bp_label': 'preview-bp_label', 'temp_label': 'preview-temp_label', 'spo2_label': 'preview-spo2_label', 'pain_label': 'preview-pain_label', 'wound_label': 'preview-wound_label', 'medication_header': 'preview-medication_header', 'med_name_header': 'preview-med_name_header', 'med_dose_header': 'preview-med_dose_header', 'med_freq_header': 'preview-med_freq_header', 'med_instr_header': 'preview-med_instr_header', 'med_dur_header': 'preview-med_dur_header', 'advice_header': 'preview-advice_header', 'advice_label': 'preview-advice_label', 'followup_date_label': 'preview-followup_date_label', 'signature_line': 'preview-signature_line',};
+                for (const key in previewElements) {
+                    const ids = Array.isArray(previewElements[key]) ? previewElements[key] : [previewElements[key]];
+                    ids.forEach(id => { document.getElementById(id).innerText = translations[lang][key]; });
+                }
+                for (const key in data) { const el = document.getElementById(`preview-${key}`); if (el) el.innerText = data[key] || '---'; }
+                const previewMedList = document.getElementById('preview-medication-list'); previewMedList.innerHTML = '';
+                document.querySelectorAll('.medication-row').forEach(row => {
+                    const name = row.querySelector('.med-name').value;
+                    if (name) {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td class="p-1.5 border">${name}</td><td class="p-1.5 border">${row.querySelector('.med-dose').value}</td><td class="p-1.5 border">${row.querySelector('.med-freq').value}</td><td class="p-1.5 border">${row.querySelector('.med-instr').options[row.querySelector('.med-instr').selectedIndex].text}</td><td class="p-1.5 border">${row.querySelector('.med-dur').value}</td>`;
+                        previewMedList.appendChild(tr);
+                    }
+                });
+                editFormBtn.innerText = translations[lang].edit_button; printSummaryBtn.innerText = translations[lang].print_button;
+                const page2 = document.getElementById('page-2');
+                if (lang === 'bn') { page2.classList.add('font-bengali'); } else { page2.classList.remove('font-bengali'); }
+            };
+
+            // --- EVENT LISTENERS ---
+            langEnBtn.addEventListener('click', () => setLanguage('en'));
+            langBnBtn.addEventListener('click', () => setLanguage('bn'));
+            addMedicationBtn.addEventListener('click', createMedicationRow);
+            dischargeForm.addEventListener('submit', (e) => { e.preventDefault(); populatePreview(); formSection.style.opacity = '0'; setTimeout(() => { formSection.style.display = 'none'; previewSection.style.display = 'block'; }, 300); });
+            editFormBtn.addEventListener('click', () => { previewSection.style.display = 'none'; formSection.style.display = 'block'; setTimeout(() => { formSection.style.opacity = '1'; }, 10); });
+            printSummaryBtn.addEventListener('click', () => { window.print(); });
+            resetFormBtn.addEventListener('click', () => { dischargeForm.reset(); medicationList.innerHTML = ''; createMedicationRow(); });
+            // --- INITIALIZATION ---
+            createMedicationRow(); setLanguage('en');
+            document.getElementById('admissionDate').valueAsDate = new Date(); document.getElementById('dischargeDate').valueAsDate = new Date();
+        });
+    </script>
+</body>
+</html>
